@@ -1,4 +1,4 @@
-# Parsey: A Minimalistic Parser-Generator Framework
+# Parsey
 
 `parsey` is a lightweight, `no_std` framework for creating custom parsers and abstract syntax trees (ASTs).
 It provides two key traits: [`Parser`][crate::Parser] and [`Ast`][crate::Ast], which together form the foundation
