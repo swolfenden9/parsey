@@ -1,20 +1,27 @@
 # Parsey
 
 `parsey` is a lightweight, `no_std` framework for creating custom parsers and abstract syntax trees (ASTs).
-It provides two key traits: [`Parser`][crate::Parser] and [`Ast`][crate::Ast], which together form the foundation
+It provides two key traits: [`Parser`] and [`Ast`], which together form the foundation
 for building parsers and representing the structure of parsed data.
+
+[`Parser`]: https://docs.rs/parsey/latest/parsey/trait.Parser.html
+[`Ast`]: https://docs.rs/parsey/latest/parsey/trait.Ast.html
 
 ## Key Features
 - **Generic Parsing Framework:** Abstracts the process of parsing tokens into structured data.
-- **Customizable AST Nodes:** Easily define nodes of your AST by implementing the [`Ast`][crate::Ast] trait.
+- **Customizable AST Nodes:** Easily define nodes of your AST by implementing the [`Ast`] trait.
 - **Integration with `no_std`:** Ideal for embedded or constrained environments.
+
+[`Ast`]: https://docs.rs/parsey/latest/parsey/trait.Ast.html
 
 ## Getting Started
 
 ### Step 1: Implement the `Parser` Trait
 
-Define a struct that will serve as your parser. This struct must implement the [`Parser`][crate::Parser] trait,
+Define a struct that will serve as your parser. This struct must implement the [`Parser`] trait,
 which processes tokens and produces an AST.
+
+[`Parser`]: https://docs.rs/parsey/latest/parsey/trait.Parser.html
 
 ```rust
 use parsey::{Parser, Ast};
