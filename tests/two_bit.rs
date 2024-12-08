@@ -1,6 +1,7 @@
 use parsey::{Ast, Parser, PeekableParser};
 
-fn main() {
+#[test]
+fn two_bit() {
     use MyToken::{One, Zero};
     use TwoBit::{OneOne, OneZero, ZeroOne, ZeroZero};
 

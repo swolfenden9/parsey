@@ -146,9 +146,6 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
 
     /// Parses an AST from a peekable token stream.
     ///
-    /// # Parameters
-    /// - `parser`: A peekable iterator implementing the `Parser` trait.
-    ///
     /// # Returns
     /// Returns the parsed AST root node or an error if parsing fails.
     ///
@@ -169,11 +166,14 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
     /// the token is consumed.
     ///
     /// # Parameters
-    /// - `token`: The token to validate against the expected token
+    /// - `peekable_parser`: A peekable iterator implementing the `Parser` trait
+    /// - `expected`: The token to validate against the expected token
     ///
     /// # Returns
-    /// - `Ok(())` if the token matches the expected token
-    /// - `Err(Error)` if the token does not match the expected token
+    /// Returns () if the token matches the expected token or an error if not.
+    ///
+    /// # Errors
+    /// Returns and error if the token does not match the expected token.
     fn expect(
         peekable_parser: &mut PeekableParser<Self, Token, Error>,
         expected: Token,
@@ -251,11 +251,14 @@ where
     /// the token is consumed.
     ///
     /// # Parameters
-    /// - `token`: The token to validate against the expected token
+    /// - `peekable_parser`: A peekable iterator implementing the `Parser` trait
+    /// - `expected`: The token to validate against the expected token
     ///
     /// # Returns
-    /// - `Ok(())` if the token matches the expected token
-    /// - `Err(Error)` if the token does not match the expected token
+    /// Returns () if the token matches the expected token or an error if not.
+    ///
+    /// # Errors
+    /// Returns and error if the token does not match the expected token.
     pub fn expect(&mut self, expected: Token) -> Result<(), Error> {
         P::expect(self, expected)
     }
