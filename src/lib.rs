@@ -180,6 +180,29 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
     ) -> Result<(), Error>;
 }
 
+/// A wrapper around a peekable parser that provides lookahead functionality.
+///
+/// `PeekableParser` enhances a parser by allowing it to look at the next token
+/// without consuming it. This is essential for making parsing decisions based on
+/// upcoming tokens.
+///
+/// # Type Parameters
+/// - `P`: The underlying parser type that implements [`Parser`]
+/// - `Token`: The type of tokens being parsed
+/// - `Error`: The type of errors that may occur during parsing
+///
+/// # Examples
+/// ```rust,ignore
+/// use parsey::{Parser, PeekableParser};
+///
+/// // Assuming MyParser and MyToken are defined...
+/// let tokens = vec![MyToken::One, MyToken::Zero];
+/// let parser = MyParser::new(tokens);
+/// let mut peekable = PeekableParser::new(parser);
+///
+/// // Peek at next token without consuming it
+/// assert_eq!(peekable.peek(), Some(&MyToken::One));
+/// ```
 pub struct PeekableParser<P, Token, Error>
 where
     P: Parser<Token, Error>,
@@ -193,7 +216,30 @@ impl<P, Token, Error> PeekableParser<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
-    /// Peeks at the next token without consuming it.
+    /// Returns a reference to the next token without consuming it.
+    ///
+    /// This method allows the parser to examine the next token in the sequence
+    /// without removing it from the stream. This is useful for making parsing
+    /// decisions based on lookahead.
+    ///
+    /// # Returns
+    /// - `Some(&Token)` if there is a next token
+    /// - `None` if the end of the token stream has been reached
+    ///
+    /// # Examples
+    /// ```rust,ignore
+    /// use parsey::{Parser, PeekableParser};
+    ///
+    /// let tokens = vec![MyToken::One, MyToken::Zero];
+    /// let parser = MyParser::new(tokens);
+    /// let mut peekable = PeekableParser::new(parser);
+    ///
+    /// // Peek at next token
+    /// assert_eq!(peekable.peek(), Some(&MyToken::One));
+    ///
+    /// // Token is still there after peeking
+    /// assert_eq!(peekable.next(), Some(MyToken::One));
+    /// ```
     pub fn peek(&mut self) -> Option<&Token> {
         self.inner.peek()
     }
@@ -210,8 +256,6 @@ where
     /// # Returns
     /// - `Ok(())` if the token matches the expected token
     /// - `Err(Error)` if the token does not match the expected token
-    ///
-    /// # Examples
     pub fn expect(&mut self, expected: Token) -> Result<(), Error> {
         P::expect(self, expected)
     }
