@@ -2,10 +2,13 @@
 name = "parsey"
 description = "A simple parser-generator framework."
 version = "0.1.2"
+authors = ["Sol Wolf<wolfendenbuild@gmail.com>"]
 edition = "2021"
-keywords = ["parser", "no_std"]
 license = "MIT OR Apache-2.0"
-documentation = "https://docs.rs/parsey/latest/parsey/"
 repository = "https://github.com/swolfenden9/parsey"
+documentation = "https://docs.rs/parsey/latest/parsey/"
+readme = "README.md"
+keywords = ["parser", "no_std"]
 
 [dependencies]
+# parsey-derive = { path = "parsey-derive" } # Extremely unstable. Do not use

@@ -119,7 +119,7 @@
 
 #![no_std]
 
-use core::iter::Peekable;
+use core::{iter::Peekable, marker::PhantomData};
 
 /// A trait representing a generic parser that consumes tokens and produces an AST.
 ///
@@ -143,7 +143,80 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
     /// # Errors
     /// Returns an error of type `Error` if the token sequence does not match the expected structure.
     fn parse(self) -> Result<Self::Root, Error> {
-        Ast::parse(&mut self.peekable())
+        Ast::parse(&mut PeekableParser {
+            inner: self.peekable(),
+            token_phantom: PhantomData,
+            error_phantom: PhantomData,
+        })
+    }
+
+    /// Validates whether a given token matches the expected token.
+    ///
+    /// This method is used to verify that the next token in the parsing sequence
+    /// matches what is expected according to the grammar rules. if it matches,
+    /// the token is consumed.
+    ///
+    /// # Parameters
+    /// - `token`: The token to validate against the expected token
+    ///
+    /// # Returns
+    /// - `Ok(())` if the token matches the expected token
+    /// - `Err(Error)` if the token does not match the expected token
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    ///
+    /// ```
+    fn expect(
+        peekable_parser: &mut PeekableParser<Self, Token, Error>,
+        expected: Token,
+    ) -> Result<(), Error>;
+}
+
+pub struct PeekableParser<P, Token, Error>
+where
+    P: Parser<Token, Error>,
+{
+    inner: Peekable<P>,
+    token_phantom: PhantomData<Token>,
+    error_phantom: PhantomData<Error>,
+}
+
+impl<P, Token, Error> PeekableParser<P, Token, Error>
+where
+    P: Parser<Token, Error>,
+{
+    /// Peeks at the next token without consuming it.
+    pub fn peek(&mut self) -> Option<&Token> {
+        self.inner.peek()
+    }
+
+    /// Validates whether a given token matches the expected token.
+    ///
+    /// This method is used to verify that the next token in the parsing sequence
+    /// matches what is expected according to the grammar rules. if it matches,
+    /// the token is consumed.
+    ///
+    /// # Parameters
+    /// - `token`: The token to validate against the expected token
+    ///
+    /// # Returns
+    /// - `Ok(())` if the token matches the expected token
+    /// - `Err(Error)` if the token does not match the expected token
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    ///
+    /// ```
+    pub fn expect(&mut self, expected: Token) -> Result<(), Error> {
+        P::expect(self, expected)
+    }
+
+    /// Advances to the next token and returns it.
+    pub fn next(&mut self) -> Option<Token> {
+        self.inner.next()
     }
 }
 
@@ -166,7 +239,7 @@ pub trait Ast<Token, Error>: Sized {
     ///
     /// # Errors
     /// Returns an error of type `Error` if the token sequence does not match the expected structure.
-    fn parse<P>(parser: &mut Peekable<P>) -> Result<Self, Error>
+    fn parse<P>(parser: &mut PeekableParser<P, Token, Error>) -> Result<Self, Error>
     where
         P: Parser<Token, Error>;
 }

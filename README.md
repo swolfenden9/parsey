@@ -4,15 +4,10 @@
 It provides two key traits: [`Parser`] and [`Ast`], which together form the foundation
 for building parsers and representing the structure of parsed data.
 
-[`Parser`]: https://docs.rs/parsey/latest/parsey/trait.Parser.html
-[`Ast`]: https://docs.rs/parsey/latest/parsey/trait.Ast.html
-
 ## Key Features
 - **Generic Parsing Framework:** Abstracts the process of parsing tokens into structured data.
 - **Customizable AST Nodes:** Easily define nodes of your AST by implementing the [`Ast`] trait.
 - **Integration with `no_std`:** Ideal for embedded or constrained environments.
-
-[`Ast`]: https://docs.rs/parsey/latest/parsey/trait.Ast.html
 
 ## Getting Started
 
@@ -20,8 +15,6 @@ for building parsers and representing the structure of parsed data.
 
 Define a struct that will serve as your parser. This struct must implement the [`Parser`] trait,
 which processes tokens and produces an AST.
-
-[`Parser`]: https://docs.rs/parsey/latest/parsey/trait.Parser.html
 
 ```rust
 use parsey::{Parser, Ast};
@@ -60,7 +53,7 @@ impl Iterator for MyParser {
 
 ### Step 2: Define the AST Nodes
 
-Create the structure for your AST by implementing the [`Ast`][crate::Ast] trait for each node.
+Create the structure for your AST by implementing the [`Ast`] trait for each node.
 The root node must match the type defined in `Parser::Root`.
 
 ```rust
@@ -129,3 +122,6 @@ fn main() {
 ## Contributing
 
 Open to pull requests.
+
+[`Parser`]: https://docs.rs/parsey/latest/parsey/trait.Parser.html
+[`Ast`]: https://docs.rs/parsey/latest/parsey/trait.Ast.html
