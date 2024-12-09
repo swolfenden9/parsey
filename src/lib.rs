@@ -16,7 +16,7 @@
 //! which processes tokens and produces an AST.
 //!
 //! ```rust,ignore
-//! use parsey::{Ast, Parser, PeekableParser};
+//! use parsey::{Ast, Parser, TokenStream};
 //!
 //! #[derive(Debug, PartialEq)]
 //! pub enum MyToken {
@@ -42,7 +42,7 @@
 //!     type Root = Root;
 //!
 //!     fn expect(
-//!         peekable_parser: &mut PeekableParser<Self, MyToken, MyError>,
+//!         peekable_parser: &mut TokenStream<Self, MyToken, MyError>,
 //!         token: MyToken,
 //!     ) -> Result<(), MyError> {
 //!         if peekable_parser.peek() == Some(&token) {
@@ -80,7 +80,7 @@
 //! }
 //!
 //! impl Ast<MyToken, MyError> for Root {
-//!     fn parse<P>(parser: &mut PeekableParser<P, MyToken, MyError>) -> Result<Self, MyError>
+//!     fn parse<P>(parser: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
 //!     where
 //!         P: Parser<MyToken, MyError>,
 //!     {
@@ -93,7 +93,7 @@
 //! }
 //!
 //! impl parsey::Ast<MyToken, MyError> for TwoBit {
-//!     fn parse<P>(parser: &mut PeekableParser<P, MyToken, MyError>) -> Result<Self, MyError>
+//!     fn parse<P>(parser: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
 //!     where
 //!         P: parsey::Parser<MyToken, MyError>,
 //!     {
@@ -129,7 +129,11 @@
 //! }
 //! ```
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![warn(missing_docs)]
+
+#[cfg(feature = "std")]
+mod std;
 
 use core::{
     iter::Peekable,
@@ -156,7 +160,7 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
     /// # Errors
     /// Returns an error of type `Error` if the token sequence does not match the expected structure.
     fn parse(self) -> Result<Self::Root, Error> {
-        Ast::parse(&mut PeekableParser {
+        Ast::parse(&mut TokenStream {
             inner: self.peekable(),
             token_phantom: PhantomData,
             error_phantom: PhantomData,
@@ -170,7 +174,7 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
     /// the token is consumed.
     ///
     /// # Parameters
-    /// - `peekable_parser`: A peekable iterator implementing the `Parser` trait
+    /// - `token_stream`: A peekable iterator implementing the `Parser` trait
     /// - `expected`: The token to validate against the expected token
     ///
     /// # Returns
@@ -179,14 +183,14 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
     /// # Errors
     /// Returns and error if the token does not match the expected token.
     fn expect(
-        peekable_parser: &mut PeekableParser<Self, Token, Error>,
+        token_stream: &mut TokenStream<Self, Token, Error>,
         expected: Token,
     ) -> Result<(), Error>;
 }
 
 /// A wrapper around a peekable parser that provides lookahead functionality.
 ///
-/// `PeekableParser` enhances a parser by allowing it to look at the next token
+/// `TokenStream` enhances a parser by allowing it to look at the next token
 /// without consuming it. This is essential for making parsing decisions based on
 /// upcoming tokens.
 ///
@@ -197,17 +201,17 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
 ///
 /// # Examples
 /// ```rust,ignore
-/// use parsey::{Parser, PeekableParser};
+/// use parsey::{Parser, TokenStream};
 ///
 /// // Assuming MyParser and MyToken are defined...
 /// let tokens = vec![MyToken::One, MyToken::Zero];
 /// let parser = MyParser::new(tokens);
-/// let mut peekable = PeekableParser::new(parser);
+/// let mut peekable = TokenStream::new(parser);
 ///
 /// // Peek at next token without consuming it
 /// assert_eq!(peekable.peek(), Some(&MyToken::One));
 /// ```
-pub struct PeekableParser<P, Token, Error>
+pub struct TokenStream<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
@@ -216,7 +220,7 @@ where
     error_phantom: PhantomData<Error>,
 }
 
-impl<P, Token, Error> PeekableParser<P, Token, Error>
+impl<P, Token, Error> TokenStream<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
@@ -227,7 +231,6 @@ where
     /// the token is consumed.
     ///
     /// # Parameters
-    /// - `peekable_parser`: A peekable iterator implementing the `Parser` trait
     /// - `expected`: The token to validate against the expected token
     ///
     /// # Returns
@@ -240,7 +243,7 @@ where
     }
 }
 
-impl<P, Token, Error> Deref for PeekableParser<P, Token, Error>
+impl<P, Token, Error> Deref for TokenStream<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
@@ -251,7 +254,7 @@ where
     }
 }
 
-impl<P, Token, Error> DerefMut for PeekableParser<P, Token, Error>
+impl<P, Token, Error> DerefMut for TokenStream<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
@@ -260,7 +263,7 @@ where
     }
 }
 
-impl<P, Token, Error> Iterator for PeekableParser<P, Token, Error>
+impl<P, Token, Error> Iterator for TokenStream<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
@@ -283,14 +286,14 @@ pub trait Ast<Token, Error>: Sized {
     /// Parses an AST node from a peekable token stream.
     ///
     /// # Parameters
-    /// - `parser`: A peekable iterator implementing the `Parser` trait.
+    /// - `token_stream`: A peekable iterator implementing the `Parser` trait.
     ///
     /// # Returns
     /// Returns the parsed AST node or an error if parsing fails.
     ///
     /// # Errors
     /// Returns an error of type `Error` if the token sequence does not match the expected structure.
-    fn parse<P>(parser: &mut PeekableParser<P, Token, Error>) -> Result<Self, Error>
+    fn parse<P>(token_stream: &mut TokenStream<P, Token, Error>) -> Result<Self, Error>
     where
         P: Parser<Token, Error>;
 }

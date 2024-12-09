@@ -10,5 +10,9 @@ documentation = "https://docs.rs/parsey/latest/parsey/"
 readme = "README.md"
 keywords = ["parser", "no_std"]
 
+[features]
+default = ["std"]
+std = []
+
 [dependencies]
-# parsey-derive = { path = "parsey-derive" } # Extremely unstable. Do not use
+parsey-derive = { path = "parsey-derive" }

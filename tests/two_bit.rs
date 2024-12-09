@@ -1,4 +1,4 @@
-use parsey::{Ast, Parser, PeekableParser};
+use parsey::{Ast, Parser, TokenStream};
 
 #[test]
 fn two_bit() {
@@ -35,7 +35,7 @@ impl Parser<MyToken, MyError> for MyParser {
     type Root = Root;
 
     fn expect(
-        peekable_parser: &mut PeekableParser<Self, MyToken, MyError>,
+        peekable_parser: &mut TokenStream<Self, MyToken, MyError>,
         token: MyToken,
     ) -> Result<(), MyError> {
         if peekable_parser.peek() == Some(&token) {
@@ -67,7 +67,7 @@ pub enum TwoBit {
 }
 
 impl Ast<MyToken, MyError> for Root {
-    fn parse<P>(parser: &mut PeekableParser<P, MyToken, MyError>) -> Result<Self, MyError>
+    fn parse<P>(parser: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
     where
         P: Parser<MyToken, MyError>,
     {
@@ -80,7 +80,7 @@ impl Ast<MyToken, MyError> for Root {
 }
 
 impl parsey::Ast<MyToken, MyError> for TwoBit {
-    fn parse<P>(parser: &mut PeekableParser<P, MyToken, MyError>) -> Result<Self, MyError>
+    fn parse<P>(parser: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
     where
         P: parsey::Parser<MyToken, MyError>,
     {
