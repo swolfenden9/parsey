@@ -1,7 +1,7 @@
 [package]
 name = "parsey"
 description = "A simple parser-generator framework."
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Sol Wolf<wolfendenbuild@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -13,6 +13,7 @@ keywords = ["parser", "no_std"]
 [features]
 default = ["std"]
 std = []
+derive = []
 
 [dependencies]
 parsey-derive = { version = "0.1.0", path = "parsey-derive" }

@@ -86,30 +86,30 @@
 //! }
 //!
 //! impl Ast<MyToken, MyError> for Root {
-//!     fn parse<P>(parser: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
+//!     fn parse<P>(token_stream: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
 //!     where
 //!         P: Parser<MyToken, MyError>,
 //!     {
 //!         let mut two_bits = vec![];
-//!         while parser.peek().is_some() {
-//!             two_bits.push(TwoBit::parse(parser)?);
+//!         while token_stream.peek().is_some() {
+//!             two_bits.push(TwoBit::parse(token_stream)?);
 //!         }
 //!         Ok(Self(two_bits))
 //!     }
 //! }
 //!
 //! impl parsey::Ast<MyToken, MyError> for TwoBit {
-//!     fn parse<P>(parser: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
+//!     fn parse<P>(token_stream: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
 //!     where
 //!         P: parsey::Parser<MyToken, MyError>,
 //!     {
-//!         match parser.next() {
-//!             Some(MyToken::Zero) => match parser.next() {
+//!         match token_stream.next() {
+//!             Some(MyToken::Zero) => match token_stream.next() {
 //!                 Some(MyToken::Zero) => Ok(TwoBit::ZeroZero),
 //!                 Some(MyToken::One) => Ok(TwoBit::ZeroOne),
 //!                 _ => Err(MyError),
 //!             },
-//!             Some(MyToken::One) => match parser.next() {
+//!             Some(MyToken::One) => match token_stream.next() {
 //!                 Some(MyToken::Zero) => Ok(TwoBit::OneZero),
 //!                 Some(MyToken::One) => Ok(TwoBit::OneOne),
 //!                 _ => Err(MyError),
