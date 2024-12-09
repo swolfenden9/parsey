@@ -33,8 +33,7 @@
 //!
 //! impl MyParser {
 //!     pub fn new(mut tokens: Vec<MyToken>) -> Self {
-//!         tokens.reverse();
-//!         Self { tokens }
+//!         tokens.into()
 //!     }
 //! }
 //!
@@ -59,6 +58,13 @@
 //!
 //!     fn next(&mut self) -> Option<Self::Item> {
 //!         self.tokens.pop()
+//!     }
+//! }
+//!
+//! impl From<Vec<MyToken>> for MyParser {
+//!     fn from(mut value: Vec<MyToken>) -> Self {
+//!         value.reverse();
+//!         Self { tokens: value }
 //!     }
 //! }
 //! ```
@@ -148,7 +154,7 @@ use core::{
 /// # Type Parameters
 /// - `Token`: The type of tokens being parsed.
 /// - `Error`: The type of errors that may occur during parsing.
-pub trait Parser<Token, Error>: Iterator<Item = Token> + Sized {
+pub trait Parser<Token, Error>: Iterator<Item = Token> + From<Vec<Token>> + Sized {
     /// The root type of the AST produced by this parser.
     type Root: Ast<Token, Error>;
 

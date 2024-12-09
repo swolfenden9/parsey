@@ -25,9 +25,8 @@ pub struct MyParser {
 }
 
 impl MyParser {
-    pub fn new(mut tokens: Vec<MyToken>) -> Self {
-        tokens.reverse();
-        Self { tokens }
+    pub fn new(tokens: Vec<MyToken>) -> Self {
+        tokens.into()
     }
 }
 
@@ -52,6 +51,13 @@ impl Iterator for MyParser {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.tokens.pop()
+    }
+}
+
+impl From<Vec<MyToken>> for MyParser {
+    fn from(mut value: Vec<MyToken>) -> Self {
+        value.reverse();
+        Self { tokens: value }
     }
 }
 
