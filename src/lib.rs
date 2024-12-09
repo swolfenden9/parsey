@@ -131,7 +131,11 @@
 
 #![no_std]
 
-use core::{iter::Peekable, marker::PhantomData};
+use core::{
+    iter::Peekable,
+    marker::PhantomData,
+    ops::{Deref, DerefMut},
+};
 
 /// A trait representing a generic parser that consumes tokens and produces an AST.
 ///
@@ -216,34 +220,6 @@ impl<P, Token, Error> PeekableParser<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
-    /// Returns a reference to the next token without consuming it.
-    ///
-    /// This method allows the parser to examine the next token in the sequence
-    /// without removing it from the stream. This is useful for making parsing
-    /// decisions based on lookahead.
-    ///
-    /// # Returns
-    /// - `Some(&Token)` if there is a next token
-    /// - `None` if the end of the token stream has been reached
-    ///
-    /// # Examples
-    /// ```rust,ignore
-    /// use parsey::{Parser, PeekableParser};
-    ///
-    /// let tokens = vec![MyToken::One, MyToken::Zero];
-    /// let parser = MyParser::new(tokens);
-    /// let mut peekable = PeekableParser::new(parser);
-    ///
-    /// // Peek at next token
-    /// assert_eq!(peekable.peek(), Some(&MyToken::One));
-    ///
-    /// // Token is still there after peeking
-    /// assert_eq!(peekable.next(), Some(MyToken::One));
-    /// ```
-    pub fn peek(&mut self) -> Option<&Token> {
-        self.inner.peek()
-    }
-
     /// Validates whether a given token matches the expected token.
     ///
     /// This method is used to verify that the next token in the parsing sequence
@@ -261,6 +237,26 @@ where
     /// Returns and error if the token does not match the expected token.
     pub fn expect(&mut self, expected: Token) -> Result<(), Error> {
         P::expect(self, expected)
+    }
+}
+
+impl<P, Token, Error> Deref for PeekableParser<P, Token, Error>
+where
+    P: Parser<Token, Error>,
+{
+    type Target = Peekable<P>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<P, Token, Error> DerefMut for PeekableParser<P, Token, Error>
+where
+    P: Parser<Token, Error>,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
     }
 }
 
