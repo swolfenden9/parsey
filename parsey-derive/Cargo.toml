@@ -1,7 +1,14 @@
 [package]
 name = "parsey-derive"
+description = "A simple parser-generator framework."
 version = "0.1.0"
+authors = ["Sol Wolf<wolfendenbuild@gmail.com>"]
 edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/swolfenden9/parsey"
+documentation = "https://docs.rs/parsey/latest/parsey/"
+readme = "../README.md"
+keywords = ["parser", "no_std"]
 
 [lib]
 proc-macro = true
