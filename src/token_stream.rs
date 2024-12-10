@@ -1,8 +1,8 @@
 use core::{
-    iter::Peekable,
     marker::PhantomData,
     ops::{Deref, DerefMut},
 };
+use std::collections::VecDeque;
 
 use crate::parser::Parser;
 
@@ -33,9 +33,9 @@ pub struct TokenStream<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
-    pub(crate) inner: Peekable<P>,
-    pub(crate) token_phantom: PhantomData<Token>,
-    pub(crate) error_phantom: PhantomData<Error>,
+    parser: P,
+    peeked: VecDeque<Option<Token>>,
+    error_phantom: PhantomData<Error>,
 }
 
 impl<P, Token, Error> TokenStream<P, Token, Error>
@@ -59,16 +59,67 @@ where
     pub fn expect(&mut self, expected: Token) -> Result<(), Error> {
         P::expect(self, expected)
     }
+
+    pub fn peek(&mut self) -> Option<&Token> {
+        self.peek_n(1).map(|t| t[0])
+    }
+
+    /// Peek at the next `n` tokens without consuming them.
+    pub fn peek_n(&mut self, n: usize) -> Option<Vec<&Token>> {
+        // Ensure there are at least `n` tokens in the `peeked` queue.
+        while self.peeked.len() < n {
+            match self.parser.next() {
+                Some(token) => self.peeked.push_back(Some(token)),
+                None => return None, // Not enough tokens
+            }
+        }
+
+        // SAFETY: `peeked` has at least `n` elements.
+        Some(
+            self.peeked
+                .iter()
+                .take(n)
+                .map(|opt| opt.as_ref().unwrap())
+                .collect::<Vec<&Token>>(),
+        )
+    }
+
+    /// Consume and return the next `n` tokens.
+    pub fn next_n(&mut self, n: usize) -> Option<Vec<Token>> {
+        let mut result = Vec::new();
+        for _ in 0..n {
+            result.push(self.next()?);
+        }
+        Some(result)
+    }
+
+    /// Returns true if there are no more tokens in the token stream.
+    pub fn is_empty(&mut self) -> bool {
+        self.peek_n(1).is_none()
+    }
+}
+
+impl<P, Token, Error> From<P> for TokenStream<P, Token, Error>
+where
+    P: Parser<Token, Error>,
+{
+    fn from(value: P) -> Self {
+        Self {
+            parser: value,
+            peeked: VecDeque::new(),
+            error_phantom: PhantomData,
+        }
+    }
 }
 
 impl<P, Token, Error> Deref for TokenStream<P, Token, Error>
 where
     P: Parser<Token, Error>,
 {
-    type Target = Peekable<P>;
+    type Target = P;
 
     fn deref(&self) -> &Self::Target {
-        &self.inner
+        &self.parser
     }
 }
 
@@ -77,7 +128,7 @@ where
     P: Parser<Token, Error>,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
+        &mut self.parser
     }
 }
 
@@ -87,7 +138,11 @@ where
 {
     type Item = Token;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
+        match self.peeked.pop_front() {
+            Some(v) => v,
+            None => self.parser.next(),
+        }
     }
 }

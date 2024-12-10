@@ -1,7 +1,7 @@
 [package]
 name = "parsey"
 description = "A simple parser-generator framework."
-version = "0.4.2"
+version = "0.5.0"
 authors = ["Sol Wolf<wolfendenbuild@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -11,8 +11,7 @@ readme = "README.md"
 keywords = ["parser", "no_std"]
 
 [features]
-default = ["std"]
-std = []
+default = []
 derive = []
 
 [dependencies]

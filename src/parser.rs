@@ -1,5 +1,3 @@
-use core::marker::PhantomData;
-
 use crate::{ast::Ast, token_stream::TokenStream};
 
 /// A trait representing a generic parser that consumes tokens and produces an AST.
@@ -21,11 +19,7 @@ pub trait Parser<Token, Error>: Iterator<Item = Token> + From<Vec<Token>> + Size
     /// # Errors
     /// Returns an error of type `Error` if the token sequence does not match the expected structure.
     fn parse(self) -> Result<Self::Root, Error> {
-        Self::Root::parse(&mut TokenStream {
-            inner: self.peekable(),
-            token_phantom: PhantomData,
-            error_phantom: PhantomData,
-        })
+        Self::Root::parse(&mut TokenStream::from(self))
     }
 
     /// Validates whether a given token matches the expected token.

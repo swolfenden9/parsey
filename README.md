@@ -1,6 +1,6 @@
 # Parsey
 
-`parsey` is a lightweight, `no_std` framework for creating custom parsers and abstract syntax trees (ASTs).
+`parsey` is a lightweight framework for creating custom parsers and abstract syntax trees (ASTs).
 
 It provides two key traits: [`Parser`] and [`Ast`], which together form the foundation
 for building parsers and representing the structure of parsed data.
@@ -9,17 +9,19 @@ for building parsers and representing the structure of parsed data.
 
 - **Generic Parsing Framework:** Abstracts the process of parsing tokens into structured data.
 - **Customizable AST Nodes:** Easily define nodes of your AST by implementing the [`Ast`] trait.
-- **Integration with `no_std`:** Ideal for embedded or constrained environments.
 
 ## Getting Started
+
+Let's implement a simple parser that parses a stream of zero and one tokens into groups of two
+bits!
 
 ### Step 1: Implement the `Parser` Trait
 
 Define a struct that will serve as your parser. This struct must implement the [`Parser`] trait,
-which processes tokens and produces an AST.
+which iterates over tokens and produces an AST.
 
 ```rust,ignore
-use parsey::{Ast, Parser, TokenStream};
+use parsey::{parse, next_2, Ast, Parser, TokenStream};
 
 #[derive(Debug, PartialEq)]
 pub enum MyToken {
@@ -32,12 +34,6 @@ pub struct MyError;
 
 pub struct MyParser {
     tokens: Vec<MyToken>,
-}
-
-impl MyParser {
-    pub fn new(mut tokens: Vec<MyToken>) -> Self {
-        tokens.into()
-    }
 }
 
 impl Parser<MyToken, MyError> for MyParser {
@@ -95,30 +91,26 @@ impl Ast<MyToken, MyError> for Root {
         P: Parser<MyToken, MyError>,
     {
         let mut two_bits = vec![];
-        while token_stream.peek().is_some() {
+        while !token_stream.is_empty() {
             two_bits.push(TwoBit::parse(token_stream)?);
         }
         Ok(Self(two_bits))
     }
 }
 
-impl parsey::Ast<MyToken, MyError> for TwoBit {
+impl Ast<MyToken, MyError> for TwoBit {
     fn parse<P>(token_stream: &mut TokenStream<P, MyToken, MyError>) -> Result<Self, MyError>
     where
         P: parsey::Parser<MyToken, MyError>,
     {
-        match token_stream.next() {
-            Some(MyToken::Zero) => match token_stream.next() {
-                Some(MyToken::Zero) => Ok(TwoBit::ZeroZero),
-                Some(MyToken::One) => Ok(TwoBit::ZeroOne),
-                _ => Err(MyError),
-            },
-            Some(MyToken::One) => match token_stream.next() {
-                Some(MyToken::Zero) => Ok(TwoBit::OneZero),
-                Some(MyToken::One) => Ok(TwoBit::OneOne),
-                _ => Err(MyError),
-            },
-            _ => Err(MyError),
+        use MyToken::*;
+        use TwoBit::*;
+
+        match next_n!(token_stream, 2, MyError) {
+            [Zero, Zero] => Ok(ZeroZero),
+            [Zero, One] => Ok(ZeroOne),
+            [One, Zero] => Ok(OneZero),
+            [One, One] => Ok(OneOne),
         }
     }
 }
@@ -133,9 +125,8 @@ use MyToken::{One, Zero};
 use TwoBit::{OneOne, OneZero, ZeroOne, ZeroZero};
 
 let tokens = vec![Zero, Zero, Zero, One, One, Zero, One, One];
-let parser = MyParser::new(tokens);
-let ast = parser.parse().unwrap();
-assert_eq!(ast, Root(vec![ZeroZero, ZeroOne, OneZero, OneOne]));
+let ast = parse::<MyParser, MyToken, MyError>(tokens);
+assert_eq!(ast, Ok(Root(vec![ZeroZero, ZeroOne, OneZero, OneOne])));
 ```
 
 [`Parser`]: https://docs.rs/parsey/latest/parsey/trait.Parser.html
