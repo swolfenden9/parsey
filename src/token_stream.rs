@@ -61,11 +61,31 @@ where
     }
 
     pub fn peek(&mut self) -> Option<&Token> {
-        self.peek_n(1).map(|t| t[0])
+        self.peek_n(1)[0]
     }
 
     /// Peek at the next `n` tokens without consuming them.
-    pub fn peek_n(&mut self, n: usize) -> Option<Vec<&Token>> {
+    pub fn peek_n(&mut self, n: usize) -> Vec<Option<&Token>> {
+        // Ensure there are at least `n` tokens in the `peeked` queue.
+        while self.peeked.len() < n {
+            self.peeked.push_back(self.parser.next());
+        }
+
+        // SAFETY: `peeked` has at least `n` elements.
+        self.peeked.iter().take(n).map(|opt| opt.as_ref()).collect()
+    }
+
+    /// Consume and return the next `n` tokens.
+    pub fn next_n(&mut self, n: usize) -> Vec<Option<Token>> {
+        let mut result = vec![];
+        for _ in 0..n {
+            result.push(self.next());
+        }
+        result
+    }
+
+    /// Peek at the next `n` tokens without consuming them. If there are not enough enough tokens, `None` is returned.
+    pub fn require_peek_n(&mut self, n: usize) -> Option<Vec<&Token>> {
         // Ensure there are at least `n` tokens in the `peeked` queue.
         while self.peeked.len() < n {
             match self.parser.next() {
@@ -84,8 +104,8 @@ where
         )
     }
 
-    /// Consume and return the next `n` tokens.
-    pub fn next_n(&mut self, n: usize) -> Option<Vec<Token>> {
+    /// Cosume and return the next `n` tokens. If there are not enough enough tokens, `None` is returned.
+    pub fn require_next_n(&mut self, n: usize) -> Option<Vec<Token>> {
         let mut result = Vec::new();
         for _ in 0..n {
             result.push(self.next()?);
@@ -95,7 +115,12 @@ where
 
     /// Returns true if there are no more tokens in the token stream.
     pub fn is_empty(&mut self) -> bool {
-        self.peek_n(1).is_none()
+        self.peek_n(1)[0].is_none()
+    }
+
+    /// Consume and discard the next `n` tokens.
+    pub fn consume(&mut self, n: usize) {
+        self.next_n(n);
     }
 }
 

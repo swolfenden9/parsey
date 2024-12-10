@@ -1,4 +1,4 @@
-use parsey::{next_n, parse, Ast, Parser, TokenStream};
+use parsey::{parse, require_next_n, Ast, Parser, TokenStream};
 
 #[test]
 pub fn two_bit() {
@@ -86,7 +86,7 @@ impl Ast<MyToken, MyError> for TwoBit {
         use MyToken::*;
         use TwoBit::*;
 
-        match next_n!(token_stream, 2, MyError) {
+        match require_next_n!(token_stream, 2, MyError) {
             [Zero, Zero] => Ok(ZeroZero),
             [Zero, One] => Ok(ZeroOne),
             [One, Zero] => Ok(OneZero),

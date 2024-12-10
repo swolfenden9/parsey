@@ -146,13 +146,31 @@ where
     P::from(tokens).parse()
 }
 
+/// Get the next `n` tokens from `token_stream`.
+#[macro_export]
+macro_rules! next_n {
+    ($token_stream:expr, $n:expr) => {{
+        let tokens: [_; $n] = $token_stream.next_n($n).try_into().unwrap();
+        tokens
+    }};
+}
+
+/// Peek at the next `n` tokens from `token_stream` without consuming them.
+#[macro_export]
+macro_rules! peek_n {
+    ($token_stream:expr, $n:expr) => {{
+        let tokens: [_; $n] = $token_stream.peek_n($n).try_into().unwrap();
+        tokens
+    }};
+}
+
 /// Get the next `n` tokens from `token_stream` or return the provided
 /// error if the token stream ends before the required amount of tokens
 /// are consumed.
 #[macro_export]
-macro_rules! next_n {
+macro_rules! require_next_n {
     ($token_stream:expr, $n:expr, $error:expr) => {
-        match $token_stream.next_n($n) {
+        match $token_stream.require_next_n($n) {
             Some(tokens) => {
                 // Unwrapping here is safe
                 let tokens: [_; $n] = tokens.try_into().unwrap();
@@ -167,10 +185,14 @@ macro_rules! next_n {
 /// error if the token stream ends before the required amount of tokens
 /// are peeked.
 #[macro_export]
-macro_rules! peek_n {
+macro_rules! require_peek_n {
     ($token_stream:expr, $n:expr, $error:expr) => {
-        match $token_stream.peek_n($n) {
-            Some(tokens) => tokens,
+        match $token_stream.require_peek_n($n) {
+            Some(tokens) => {
+                // Unwrapping here is safe
+                let tokens: [_; $n] = tokens.try_into().unwrap();
+                tokens
+            }
             None => return Err($error),
         };
     };
