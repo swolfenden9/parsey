@@ -18,7 +18,7 @@
 //! which iterates over tokens and produces an AST.
 //!
 //! ```rust,ignore
-//! use parsey::{Ast, Parser, TokenStream};
+//! use parsey::{parse, require_next_n, Ast, Parser, TokenStream};
 //!
 //! #[derive(Debug, PartialEq)]
 //! pub enum MyToken {
@@ -102,7 +102,7 @@
 //!         use MyToken::*;
 //!         use TwoBit::*;
 //!
-//!         match next_n!(token_stream, 2, MyError) {
+//!         match require_next_n!(token_stream, 2, MyError) {
 //!             [Zero, Zero] => Ok(ZeroZero),
 //!             [Zero, One] => Ok(ZeroOne),
 //!             [One, Zero] => Ok(OneZero),
