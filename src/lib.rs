@@ -150,7 +150,7 @@ where
 #[macro_export]
 macro_rules! next_n {
     ($token_stream:expr, $n:expr) => {{
-        let tokens: [_; $n] = $token_stream.next_n($n).try_into().unwrap();
+        let tokens: [Option<_>; $n] = $token_stream.next_n($n).try_into().unwrap();
         tokens
     }};
 }
@@ -159,7 +159,7 @@ macro_rules! next_n {
 #[macro_export]
 macro_rules! peek_n {
     ($token_stream:expr, $n:expr) => {{
-        let tokens: [_; $n] = $token_stream.peek_n($n).try_into().unwrap();
+        let tokens: [Option<&s_>; $n] = $token_stream.peek_n($n).try_into().unwrap();
         tokens
     }};
 }
@@ -190,7 +190,7 @@ macro_rules! require_peek_n {
         match $token_stream.require_peek_n($n) {
             Some(tokens) => {
                 // Unwrapping here is safe
-                let tokens: [_; $n] = tokens.try_into().unwrap();
+                let tokens: [&s_; $n] = tokens.try_into().unwrap();
                 tokens
             }
             None => return Err($error),
